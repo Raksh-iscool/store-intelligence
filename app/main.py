@@ -17,6 +17,7 @@ from app.transaction_models import Transaction
 from app.transactions import create_transaction
 from app.funnel import get_funnel
 from app.heatmap import get_heatmap
+from app.anomalies import get_anomalies
 
 
 Base.metadata.create_all(bind=engine)
@@ -98,6 +99,16 @@ def heatmap(
     db: Session = Depends(get_db)
 ):
     return get_heatmap(
+        db,
+        store_id
+    )
+
+@app.get("/stores/{store_id}/anomalies")
+def anomalies(
+    store_id: str,
+    db: Session = Depends(get_db)
+):
+    return get_anomalies(
         db,
         store_id
     )
