@@ -2,6 +2,9 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from typing import List
+
+
 
 class EventCreate(BaseModel):
     event_id: str
@@ -22,3 +25,6 @@ class EventCreate(BaseModel):
 
 class EventResponse(EventCreate):
     pass
+
+class EventBatch(BaseModel):
+    events: List[EventCreate]

@@ -1,23 +1,30 @@
 from sqlalchemy.orm import Session
-
 from app.models import Event
 
+def insert_events(db: Session, events):
 
-def insert_event(db: Session, event):
+    inserted = 0
+    duplicates = 0
 
-    existing = (
-        db.query(Event)
-        .filter(Event.event_id == event.event_id)
-        .first()
-    )
+    for event in events:
 
-    if existing:
-        return False
+        existing = (
+            db.query(Event)
+            .filter(Event.event_id == event.event_id)
+            .first()
+        )
 
-    row = Event(**event.model_dump())
+        if existing:
+            duplicates += 1
+            continue
 
-    db.add(row)
+        row = Event(**event.model_dump())
+        db.add(row)
+        inserted += 1
 
     db.commit()
 
-    return True
+    return {
+        "inserted": inserted,
+        "duplicates": duplicates
+    }

@@ -9,8 +9,10 @@ from app.database import get_db
 
 from app.schemas import EventCreate
 
-from app.ingestion import insert_event
+
 from app.metrics import get_metrics
+from app.schemas import EventBatch
+from app.ingestion import insert_events
 
 Base.metadata.create_all(bind=engine)
 
@@ -35,20 +37,19 @@ def health():
 
 
 @app.post("/events/ingest")
-def ingest_event(
-    event: EventCreate,
+def ingest_events(
+    payload: EventBatch,
     db: Session = Depends(get_db)
 ):
-
-    inserted = insert_event(
+    result = insert_events(
         db,
-        event
+        payload.events
     )
 
     return {
-        "inserted": inserted
+        "received": len(payload.events),
+        **result
     }
-
 
 @app.get("/stores/{store_id}/metrics")
 def metrics(
