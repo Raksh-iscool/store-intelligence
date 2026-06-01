@@ -15,6 +15,7 @@ from app.schemas import EventBatch
 from app.ingestion import insert_events
 from app.transaction_models import Transaction
 from app.transactions import create_transaction
+from app.funnel import get_funnel
 
 Base.metadata.create_all(bind=engine)
 
@@ -79,3 +80,12 @@ def add_demo_transaction(
     return {
         "message": "transaction added"
     }
+@app.get("/stores/{store_id}/funnel")
+def funnel(
+    store_id: str,
+    db: Session = Depends(get_db)
+):
+    return get_funnel(
+        db,
+        store_id
+    )
