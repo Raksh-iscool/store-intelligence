@@ -16,6 +16,8 @@ from app.ingestion import insert_events
 from app.transaction_models import Transaction
 from app.transactions import create_transaction
 from app.funnel import get_funnel
+from app.heatmap import get_heatmap
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -86,6 +88,16 @@ def funnel(
     db: Session = Depends(get_db)
 ):
     return get_funnel(
+        db,
+        store_id
+    )
+
+@app.get("/stores/{store_id}/heatmap")
+def heatmap(
+    store_id: str,
+    db: Session = Depends(get_db)
+):
+    return get_heatmap(
         db,
         store_id
     )
