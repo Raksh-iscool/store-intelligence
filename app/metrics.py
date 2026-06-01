@@ -1,31 +1,72 @@
 from sqlalchemy.orm import Session
 
 from app.models import Event
+from app.transaction_models import Transaction
 
 
-def get_metrics(db: Session, store_id: str):
+def get_metrics(
+    db: Session,
+    store_id: str
+):
 
     visitors = (
         db.query(Event.visitor_id)
-        .filter(Event.store_id == store_id)
-        .filter(Event.is_staff == False)
+        .filter(
+            Event.store_id == store_id
+        )
+        .filter(
+            Event.is_staff == False
+        )
         .distinct()
         .count()
     )
 
-    avg_dwell = (
+    purchases = (
+        db.query(Transaction)
+        .filter(
+            Transaction.store_id == store_id
+        )
+        .count()
+    )
+
+    conversion_rate = 0
+
+    if visitors > 0:
+        conversion_rate = (
+            purchases / visitors
+        ) * 100
+
+    dwell_events = (
         db.query(Event)
-        .filter(Event.store_id == store_id)
-        .filter(Event.dwell_ms > 0)
+        .filter(
+            Event.store_id == store_id
+        )
+        .filter(
+            Event.dwell_ms > 0
+        )
         .all()
     )
 
-    dwell = 0
+    avg_dwell = 0
 
-    if avg_dwell:
-        dwell = sum(x.dwell_ms for x in avg_dwell) / len(avg_dwell)
+    if dwell_events:
+        avg_dwell = (
+            sum(
+                e.dwell_ms
+                for e in dwell_events
+            )
+            / len(dwell_events)
+        )
 
     return {
         "unique_visitors": visitors,
-        "average_dwell_ms": round(dwell, 2)
+        "purchases": purchases,
+        "conversion_rate": round(
+            conversion_rate,
+            2
+        ),
+        "average_dwell_ms": round(
+            avg_dwell,
+            2
+        )
     }

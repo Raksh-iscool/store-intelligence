@@ -13,6 +13,8 @@ from app.schemas import EventCreate
 from app.metrics import get_metrics
 from app.schemas import EventBatch
 from app.ingestion import insert_events
+from app.transaction_models import Transaction
+from app.transactions import create_transaction
 
 Base.metadata.create_all(bind=engine)
 
@@ -60,3 +62,20 @@ def metrics(
         db,
         store_id
     )
+
+@app.post("/transactions/demo")
+def add_demo_transaction(
+    db: Session = Depends(get_db)
+):
+
+    create_transaction(
+        db,
+        transaction_id="TXN_001",
+        store_id="STORE_BLR_001",
+        timestamp="2026-03-03T14:30:00Z",
+        basket_value=1200
+    )
+
+    return {
+        "message": "transaction added"
+    }
