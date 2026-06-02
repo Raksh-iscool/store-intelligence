@@ -2,6 +2,7 @@ from ultralytics import YOLO
 import cv2
 from datetime import datetime
 import requests
+
 VIDEO = "data/videos/CAM 5.mp4"
 
 QUEUE_X1 = 850
@@ -54,16 +55,39 @@ while True:
 
             seen_ids.add(track_id)
 
-         response = requests.post(
-    "http://127.0.0.1:8000/events/ingest",
-    json={
-        "events": [event]
-    }
-)
+            event = {
+                "event_id": f"queue_{track_id}",
+                "store_id": "STORE_BLR_001",
+                "camera_id": "CAM_5",
+                "visitor_id": f"VIS_{track_id}",
+                "event_type": "BILLING_QUEUE_JOIN",
+                "timestamp": datetime.utcnow().isoformat(),
+                "zone_id": "BILLING",
+                "dwell_ms": 0,
+                "is_staff": False,
+                "confidence": 0.9
+            }
 
-print(
-    event["visitor_id"],
-    response.status_code
-)   
+            try:
+
+                response = requests.post(
+                    "http://127.0.0.1:8000/events/ingest",
+                    json={
+                        "events": [event]
+                    },
+                    timeout=5
+                )
+
+                print(
+                    event["visitor_id"],
+                    response.status_code
+                )
+
+            except Exception as e:
+
+                print(
+                    "POST FAILED:",
+                    e
+                )
 
 cap.release()
